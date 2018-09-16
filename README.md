@@ -1,0 +1,2 @@
+# Rowfitt Erg Data Service - Using Spring WebFlux
+[![Build Status](https://travis-ci.com/anuragkapur/rowfitt-erg-data-service-springwebflux.svg?branch=master)](https://travis-ci.com/anuragkapur/rowfitt-erg-data-service-springwebflux)
