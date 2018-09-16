@@ -2,12 +2,13 @@ package com.beancrunch.rowfittapi;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Mono;
 
 @RestController
 public class HelloController {
 
     @GetMapping("/hello")
-    public String handle() {
-        return "Hello Webflux";
+    public Mono<String> handle() {
+        return Mono.just("Hello Webflux!");
     }
 }
