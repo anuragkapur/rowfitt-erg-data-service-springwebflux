@@ -1,4 +1,4 @@
-package com.beancrunch.rowfittapi.controllers;
+package com.beancrunch.rowfittapi.controller;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
