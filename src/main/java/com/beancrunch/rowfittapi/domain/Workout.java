@@ -9,7 +9,7 @@ import java.util.UUID;
 @Data
 public class Workout {
 
-    private UUID workoutId;
+    private String workoutId;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyy")
     private Date date;
     private int timeHh;
@@ -22,6 +22,6 @@ public class Workout {
     private String userId;
 
     public Workout() {
-        workoutId = UUID.randomUUID();
+        workoutId = UUID.randomUUID().toString();
     }
 }
