@@ -1,8 +1,8 @@
 package com.beancrunch.rowfittapi.repository;
 
 import com.beancrunch.rowfittapi.domain.Workout;
+import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 
-public interface WorkoutRepository {
+public interface WorkoutRepository extends ReactiveCrudRepository<Workout, String> {
 
-    void addWorkout(Workout workout);
 }

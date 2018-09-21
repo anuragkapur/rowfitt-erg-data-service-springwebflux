@@ -3,6 +3,7 @@ package com.beancrunch.rowfittapi.controller;
 import com.beancrunch.rowfittapi.domain.Workout;
 import com.beancrunch.rowfittapi.repository.InMemoryRepository;
 import com.beancrunch.rowfittapi.repository.WorkoutRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -13,6 +14,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.reactive.server.EntityExchangeResult;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.BodyInserters;
+
+import java.io.IOException;
 
 @RunWith(SpringRunner.class)
 @WebFluxTest(WorkoutController.class)
@@ -25,8 +28,10 @@ public class WorkoutControllerTest {
     @Autowired
     private WorkoutRepository workoutRepository;
 
+    private ObjectMapper objectMapper = new ObjectMapper();
+
     @Test
-    public void saveWorkoutEndpointShouldSaveWorkoutToRepo() {
+    public void saveWorkoutEndpointShouldSaveWorkoutToRepo() throws IOException {
 
         String requestBody = "{\"date\":\"29/07/2018\",\"timeHh\":\"0\",\"timeMm\":\"19\",\"timeSss\":\"30.0\"," +
                 "\"splitMm\":\"1\",\"splitSss\":\"57.0\",\"strokeRate\":\"23\",\"heartRate\":\"163\"}";
@@ -45,10 +50,11 @@ public class WorkoutControllerTest {
                 .expectBody(Workout.class)
                 .returnResult();
 
-        Workout workout = savedResult.getResponseBody();
-        String savedWorkoutId = workout.getWorkoutId();
+        String savedWorkoutId = savedResult.getResponseBody().getWorkoutId();
+        Workout expectedSavedWorkout = objectMapper.readValue(requestBody, Workout.class);
+        expectedSavedWorkout.setWorkoutId(savedWorkoutId);
 
-        Workout savedWorkoutFromRepo = this.workoutRepository.getByWorkoutId(savedWorkoutId);
-        Assert.assertEquals("todo", savedWorkoutFromRepo.toString());
+        Workout actualSavedWorkoutFromRepo = this.workoutRepository.findById(savedWorkoutId).block();
+        Assert.assertEquals(expectedSavedWorkout, actualSavedWorkoutFromRepo);
     }
 }
