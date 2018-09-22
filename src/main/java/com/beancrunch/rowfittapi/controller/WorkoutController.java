@@ -11,7 +11,7 @@ import reactor.core.publisher.Mono;
 import java.net.URI;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "${corsOrigins}")
 @RequestMapping("/api")
 public class WorkoutController {
 
