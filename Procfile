@@ -1,0 +1,1 @@
+web: java -jar target/rowfitt-spring-webflux-api-0.0.1-SNAPSHOT.jar
