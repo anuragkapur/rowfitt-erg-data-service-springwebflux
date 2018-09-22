@@ -10,7 +10,7 @@ import java.util.UUID;
 public class Workout {
 
     private String workoutId;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyy")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-mm-dd")
     private Date date;
     private int timeHh;
     private int timeMm;
