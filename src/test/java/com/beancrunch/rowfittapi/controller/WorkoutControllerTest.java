@@ -33,7 +33,7 @@ public class WorkoutControllerTest {
     @Test
     public void saveWorkoutEndpointShouldSaveWorkoutToRepo() throws IOException {
 
-        String requestBody = "{\"date\":\"29/07/2018\",\"timeHh\":\"0\",\"timeMm\":\"19\",\"timeSss\":\"30.0\"," +
+        String requestBody = "{\"date\":\"2018-07-29\",\"timeHh\":\"0\",\"timeMm\":\"19\",\"timeSss\":\"30.0\"," +
                 "\"splitMm\":\"1\",\"splitSss\":\"57.0\",\"strokeRate\":\"23\",\"heartRate\":\"163\"}";
 
         String expectedLocationHeaderRegex = "^.*/api/workout/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-" +
