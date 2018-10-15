@@ -20,8 +20,10 @@ public class InMemoryRepository implements WorkoutRepository {
 
     @Override
     public <S extends Workout> Mono<S> save(S entity) {
-        workoutsMap.put(entity.getWorkoutId(), entity);
-        return Mono.just(entity);
+        return Mono.fromCallable(() -> {
+            workoutsMap.put(entity.getWorkoutId(), entity);
+            return entity;
+        });
     }
 
     @Override
