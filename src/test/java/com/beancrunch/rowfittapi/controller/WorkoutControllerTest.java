@@ -46,25 +46,26 @@ public class WorkoutControllerTest {
             "[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$";
 
     @Before
-    public void setUp() {
+    public void setUp() throws ParseException {
         workoutRepository.deleteAll().block();
         for (int i = 0; i < 3; i++) {
-            saveWorkoutForUser("user1@example.com");
+            saveWorkoutForUser("anurag@beancrunch.com");
         }
-        saveWorkoutForUser("user2@example.com");
+        saveWorkoutForUser("user1@example.com");
+        JWTTestSupportClock jwtTestSupportClock = new JWTTestSupportClock(getValidDateCorrespondingToTestAccessToken());
+        authorisationFilter.setJwtParser(Jwts.parser().setClock(jwtTestSupportClock));
     }
 
-    private void saveWorkoutForUser(String userId) {
+    private void saveWorkoutForUser(String userId) throws ParseException {
         Workout workout = new Workout();
         workout.setUserId(userId);
+        workout.setDate(new Date());
+        workout.setDate(getDate("22/10/2018 01:00:00"));
         workoutRepository.save(workout).block();
     }
 
     @Test
-    public void saveWorkoutEndpointWithValidAccessTokenShouldSaveWorkoutToRepo() throws IOException, ParseException {
-        JWTTestSupportClock jwtTestSupportClock = new JWTTestSupportClock(getValidDateCorrespondingToTestAccessToken());
-        authorisationFilter.setJwtParser(Jwts.parser().setClock(jwtTestSupportClock));
-
+    public void saveWorkoutEndpointWithValidAccessTokenShouldSaveWorkoutToRepo() throws IOException {
         EntityExchangeResult<Workout> savedResult = this.webTestClient
                 .post()
                 .uri("/api/workout")
@@ -99,10 +100,11 @@ public class WorkoutControllerTest {
     }
 
     @Test
-    public void getWorkoutsForUserShouldReturnAllWorkoutsForTheUser() {
+    public void getWorkoutsForUserWithValidAccessTokenShouldReturnAllWorkoutsForTheUser() {
         EntityExchangeResult<List<Workout>> workoutsResult = this.webTestClient
                 .get()
-                .uri("/api/workouts?userId=user1@example.com")
+                .uri("/api/workouts?userId=anurag@beancrunch.com")
+                .header("Authorization", "Bearer " + getValidAccessToken())
                 .exchange()
                 .expectStatus().isOk()
                 .expectBodyList(Workout.class)
@@ -115,8 +117,12 @@ public class WorkoutControllerTest {
 
     private Date getValidDateCorrespondingToTestAccessToken() throws ParseException {
         String validDate = "22/10/2018 01:00:00";
+        return getDate(validDate);
+    }
+
+    private Date getDate(String dateString) throws ParseException {
         DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-        return dateFormat.parse(validDate);
+        return dateFormat.parse(dateString);
     }
 
     private String getValidAccessToken() {
