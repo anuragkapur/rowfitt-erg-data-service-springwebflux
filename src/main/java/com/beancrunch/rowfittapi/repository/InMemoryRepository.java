@@ -27,6 +27,13 @@ public class InMemoryRepository implements WorkoutRepository {
     }
 
     @Override
+    public Flux<Workout> getAllWorkoutsForUser(String userId) {
+        return Flux.fromStream(
+                workoutsMap.values().stream().filter(w -> w.getUserId().equals(userId))
+        );
+    }
+
+    @Override
     public <S extends Workout> Flux<S> saveAll(Iterable<S> entities) {
         return null;
     }
@@ -102,24 +109,10 @@ public class InMemoryRepository implements WorkoutRepository {
     }
 
     @Override
-    public Mono<Void> deleteAll() {
-        return null;
+    public Mono<Void>deleteAll() {
+        return Mono.fromCallable(() -> {
+            workoutsMap.clear();
+            return workoutsMap;
+        }).then();
     }
-
-
-//    @Override
-//    public String addWorkout(Workout workout) {
-//        workoutsMap.put(workout.getWorkoutId(), workout);
-//        return workout.getWorkoutId();
-//    }
-//
-//    @Override
-//    public Collection<Workout> getAllWorkouts() {
-//        return workoutsMap.values();
-//    }
-//
-//    @Override
-//    public Workout getByWorkoutId(String workoutId) {
-//        return workoutsMap.get(workoutId);
-//    }
 }
