@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.net.URI;
@@ -20,11 +21,18 @@ public class WorkoutController {
 
     @PostMapping("/workout")
     @ResponseStatus(HttpStatus.CREATED)
-    public Mono<ResponseEntity> saveWorkout(@RequestBody Workout workout) {
-        System.out.println(workout.toString());
+    public Mono<ResponseEntity> saveWorkout(@RequestBody Workout workout, @RequestAttribute(required = false) String userId) {
+        workout.setUserId(userId);
         return workoutRepository
                 .save(workout)
                 .map(WorkoutController::responseEntityFromWorkout);
+    }
+
+    @GetMapping("/workouts")
+    public Flux<Workout> getWorkoutsForUser(@RequestParam String userId) {
+        System.out.println(userId);
+        return workoutRepository.getAllWorkoutsForUser(userId);
+
     }
 
     private static ResponseEntity responseEntityFromWorkout(Workout w) {
