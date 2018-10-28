@@ -50,32 +50,32 @@ public class WorkoutController {
         }
     }
 
-@GetMapping("/workouts")
-public Flux<Workout> getWorkoutsForUser(@RequestAttribute(name = "userId") String allowedUserId,
-        @RequestParam(name = "userId") String requestedUserId, @RequestParam(required = false) String minDate,
-        @RequestParam(required = false) String maxDate, @RequestParam(required = false) String minDistance,
-        @RequestParam(required = false) String maxDistance, @RequestParam(required = false) String minTimeHh,
-        @RequestParam(required = false) String maxTimeHh, @RequestParam(required = false) String minTimeMm,
-        @RequestParam(required = false) String maxTimeMm, @RequestParam(required = false) String sortBy) {
+    @GetMapping("/workouts")
+    public Flux<Workout> getWorkoutsForUser(@RequestAttribute(name = "userId") String allowedUserId,
+            @RequestParam(name = "userId") String requestedUserId, @RequestParam(required = false) String minDate,
+            @RequestParam(required = false) String maxDate, @RequestParam(required = false) String minDistance,
+            @RequestParam(required = false) String maxDistance, @RequestParam(required = false) String minTimeHh,
+            @RequestParam(required = false) String maxTimeHh, @RequestParam(required = false) String minTimeMm,
+            @RequestParam(required = false) String maxTimeMm, @RequestParam(required = false) String sortBy) {
 
-    if (requestedUserId.equals(allowedUserId)) {
-        FilterCriteria.FilterCriteriaBuilder builder = FilterCriteria.builder();
-        ofNullable(minDate).flatMap(this::getDate).map(builder::minDate);
-        ofNullable(maxDate).flatMap(this::getDate).map(builder::maxDate);
-        ofNullable(minDistance).map(Integer::parseInt).map(builder::minDistance);
-        ofNullable(maxDistance).map(Integer::parseInt).map(builder::maxDistance);
-        ofNullable(minTimeHh).map(Integer::parseInt).map(builder::minTimeHh);
-        ofNullable(maxTimeHh).map(Integer::parseInt).map(builder::maxTimeHh);
-        ofNullable(minTimeMm).map(Integer::parseInt).map(builder::minTimeMm);
-        ofNullable(maxTimeMm).map(Integer::parseInt).map(builder::maxTimeMm);
-        ofNullable(sortBy).map(SortBy::valueOf).map(builder::sortBy);
-        return workoutRepository
-                .getAllWorkoutsForUser(requestedUserId, builder.build())
-                .sort(WorkoutController::compareDates);
-    } else {
-        throw new NotAuthorisedException("Access token not authorised to get workouts for user="+requestedUserId);
+        if (requestedUserId.equals(allowedUserId)) {
+            FilterCriteria.FilterCriteriaBuilder builder = FilterCriteria.builder();
+            ofNullable(minDate).flatMap(this::getDate).map(builder::minDate);
+            ofNullable(maxDate).flatMap(this::getDate).map(builder::maxDate);
+            ofNullable(minDistance).map(Integer::parseInt).map(builder::minDistance);
+            ofNullable(maxDistance).map(Integer::parseInt).map(builder::maxDistance);
+            ofNullable(minTimeHh).map(Integer::parseInt).map(builder::minTimeHh);
+            ofNullable(maxTimeHh).map(Integer::parseInt).map(builder::maxTimeHh);
+            ofNullable(minTimeMm).map(Integer::parseInt).map(builder::minTimeMm);
+            ofNullable(maxTimeMm).map(Integer::parseInt).map(builder::maxTimeMm);
+            ofNullable(sortBy).map(SortBy::valueOf).map(builder::sortBy);
+            return workoutRepository
+                    .getAllWorkoutsForUser(requestedUserId, builder.build())
+                    .sort(WorkoutController::compareDates);
+        } else {
+            throw new NotAuthorisedException("Access token not authorised to get workouts for user="+requestedUserId);
+        }
     }
-}
 
     private static ResponseEntity responseEntityFromWorkout(Workout w) {
         String workoutUriFormat = "/api/workout/%s";
