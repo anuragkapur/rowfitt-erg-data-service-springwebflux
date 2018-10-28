@@ -1,5 +1,6 @@
 package com.beancrunch.rowfittapi.repository;
 
+import com.beancrunch.rowfittapi.domain.FilterCriteria;
 import com.beancrunch.rowfittapi.domain.Workout;
 import org.reactivestreams.Publisher;
 import org.springframework.stereotype.Component;
@@ -31,6 +32,11 @@ public class InMemoryRepository implements WorkoutRepository {
         return Flux.fromStream(
                 workoutsMap.values().stream().filter(w -> w.getUserId().equals(userId))
         );
+    }
+
+    @Override
+    public Flux<Workout> getAllWorkoutsForUser(String requestedUserId, FilterCriteria build) {
+        return null;
     }
 
     @Override

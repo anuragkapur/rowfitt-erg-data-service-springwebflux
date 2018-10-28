@@ -1,5 +1,7 @@
 package com.beancrunch.rowfittapi.controller;
 
+import com.beancrunch.rowfittapi.domain.FilterCriteria;
+import com.beancrunch.rowfittapi.domain.SortBy;
 import com.beancrunch.rowfittapi.domain.Workout;
 import com.beancrunch.rowfittapi.filter.NotAuthorisedException;
 import com.beancrunch.rowfittapi.repository.WorkoutRepository;
@@ -11,6 +13,13 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.net.URI;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Optional;
+
+import static java.util.Optional.ofNullable;
 
 @RestController
 @CrossOrigin(origins = "${corsOrigins}")
@@ -41,6 +50,39 @@ public class WorkoutController {
         }
     }
 
+    @GetMapping("/workouts")
+    public Flux<Workout> getWorkoutsForUser(
+            @RequestAttribute(name = "userId") String allowedUserId,
+            @RequestParam(name = "userId") String requestedUserId,
+            @RequestParam(required = false) String minDate,
+            @RequestParam(required = false) String maxDate,
+            @RequestParam(required = false) String minDistance,
+            @RequestParam(required = false) String maxDistance,
+            @RequestParam(required = false) String minTimeHh,
+            @RequestParam(required = false) String maxTimeHh,
+            @RequestParam(required = false) String minTimeMm,
+            @RequestParam(required = false) String maxTimeMm,
+            @RequestParam(required = false) String sortBy
+                                           ) {
+        if (requestedUserId.equals(allowedUserId)) {
+            FilterCriteria.FilterCriteriaBuilder filterCriteriaBuilder = FilterCriteria.builder();
+            ofNullable(minDate).flatMap(this::getDate).map(filterCriteriaBuilder::minDate);
+            ofNullable(maxDate).flatMap(this::getDate).map(filterCriteriaBuilder::maxDate);
+            ofNullable(minDistance).map(Integer::parseInt).map(filterCriteriaBuilder::minDistance);
+            ofNullable(maxDistance).map(Integer::parseInt).map(filterCriteriaBuilder::maxDistance);
+            ofNullable(minTimeHh).map(Integer::parseInt).map(filterCriteriaBuilder::minTimeHh);
+            ofNullable(maxTimeHh).map(Integer::parseInt).map(filterCriteriaBuilder::maxTimeHh);
+            ofNullable(minTimeMm).map(Integer::parseInt).map(filterCriteriaBuilder::minTimeMm);
+            ofNullable(maxTimeMm).map(Integer::parseInt).map(filterCriteriaBuilder::maxTimeMm);
+            ofNullable(sortBy).map(SortBy::valueOf).map(filterCriteriaBuilder::sortBy);
+            return workoutRepository
+                    .getAllWorkoutsForUser(requestedUserId, filterCriteriaBuilder.build())
+                    .sort(WorkoutController::compareDates);
+        } else {
+            throw new NotAuthorisedException("Access token not authorised to get workouts for user="+requestedUserId);
+        }
+    }
+
     private static ResponseEntity responseEntityFromWorkout(Workout w) {
         String workoutUriFormat = "/api/workout/%s";
         return ResponseEntity
@@ -54,5 +96,15 @@ public class WorkoutController {
         } else {
             return 1;
         }
+    }
+
+    private Optional<Date> getDate(String dateString) {
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd");
+        try {
+            return Optional.of(dateFormat.parse(dateString));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return Optional.empty();
     }
 }
