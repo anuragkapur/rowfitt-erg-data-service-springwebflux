@@ -43,8 +43,11 @@ public class InMemoryWorkoutRepository implements WorkoutRepository {
     }
 
     @Override
-    public Flux<Workout> getAllWorkoutsForUser(String requestedUserId, FilterCriteria build) {
-        return null;
+    public Flux<Workout> getAllWorkoutsForUser(String userId, FilterCriteria build) {
+        //todo: apply filter criteria
+        return Flux.fromStream(
+                workoutsMap.values().stream().filter(w -> w.getUserId().equals(userId))
+        );
     }
 
     @Override

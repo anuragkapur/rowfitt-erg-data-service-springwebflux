@@ -23,13 +23,13 @@ import static java.util.Optional.ofNullable;
 
 @RestController
 @CrossOrigin(origins = "${corsOrigins}")
-@RequestMapping("/api")
+@RequestMapping("/api/workouts")
 public class WorkoutController {
 
     @Autowired
     private WorkoutRepository workoutRepository;
 
-    @PostMapping("/workout")
+    @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Mono<ResponseEntity> saveWorkout(@RequestBody Workout workout, @RequestAttribute String userId) {
         workout.setUserId(userId);
@@ -38,19 +38,7 @@ public class WorkoutController {
                 .map(WorkoutController::responseEntityFromWorkout);
     }
 
-    @GetMapping("/workouts")
-    public Flux<Workout> getWorkoutsForUser(@RequestParam(name = "userId") String requestedUserId,
-                                            @RequestAttribute(name = "userId") String allowedUserId) {
-        if (requestedUserId.equals(allowedUserId)) {
-            return workoutRepository
-                    .getAllWorkoutsForUser(requestedUserId)
-                    .sort(WorkoutController::compareDates);
-        } else {
-            throw new NotAuthorisedException("Access token not authorised to get workouts for user="+requestedUserId);
-        }
-    }
-
-    @GetMapping("/workouts")
+    @GetMapping
     public Flux<Workout> getWorkoutsForUser(@RequestAttribute(name = "userId") String allowedUserId,
             @RequestParam(name = "userId") String requestedUserId, @RequestParam(required = false) String minDate,
             @RequestParam(required = false) String maxDate, @RequestParam(required = false) String minDistance,
@@ -58,27 +46,29 @@ public class WorkoutController {
             @RequestParam(required = false) String maxTimeHh, @RequestParam(required = false) String minTimeMm,
             @RequestParam(required = false) String maxTimeMm, @RequestParam(required = false) String sortBy) {
 
-        if (requestedUserId.equals(allowedUserId)) {
-            FilterCriteria.FilterCriteriaBuilder builder = FilterCriteria.builder();
-            ofNullable(minDate).flatMap(this::getDate).map(builder::minDate);
-            ofNullable(maxDate).flatMap(this::getDate).map(builder::maxDate);
-            ofNullable(minDistance).map(Integer::parseInt).map(builder::minDistance);
-            ofNullable(maxDistance).map(Integer::parseInt).map(builder::maxDistance);
-            ofNullable(minTimeHh).map(Integer::parseInt).map(builder::minTimeHh);
-            ofNullable(maxTimeHh).map(Integer::parseInt).map(builder::maxTimeHh);
-            ofNullable(minTimeMm).map(Integer::parseInt).map(builder::minTimeMm);
-            ofNullable(maxTimeMm).map(Integer::parseInt).map(builder::maxTimeMm);
-            ofNullable(sortBy).map(SortBy::valueOf).map(builder::sortBy);
-            return workoutRepository
-                    .getAllWorkoutsForUser(requestedUserId, builder.build())
-                    .sort(WorkoutController::compareDates);
-        } else {
+        if (!requestedUserId.equals(allowedUserId)) {
             throw new NotAuthorisedException("Access token not authorised to get workouts for user="+requestedUserId);
         }
+
+
+        FilterCriteria.FilterCriteriaBuilder builder = FilterCriteria.builder();
+        ofNullable(minDate).flatMap(this::getDate).map(builder::minDate);
+        ofNullable(maxDate).flatMap(this::getDate).map(builder::maxDate);
+        ofNullable(minDistance).map(Integer::parseInt).map(builder::minDistance);
+        ofNullable(maxDistance).map(Integer::parseInt).map(builder::maxDistance);
+        ofNullable(minTimeHh).map(Integer::parseInt).map(builder::minTimeHh);
+        ofNullable(maxTimeHh).map(Integer::parseInt).map(builder::maxTimeHh);
+        ofNullable(minTimeMm).map(Integer::parseInt).map(builder::minTimeMm);
+        ofNullable(maxTimeMm).map(Integer::parseInt).map(builder::maxTimeMm);
+        ofNullable(sortBy).map(SortBy::valueOf).map(builder::sortBy);
+
+        return workoutRepository
+                .getAllWorkoutsForUser(requestedUserId, builder.build())
+                .sort(WorkoutController::compareDates);
     }
 
     private static ResponseEntity responseEntityFromWorkout(Workout w) {
-        String workoutUriFormat = "/api/workout/%s";
+        String workoutUriFormat = "/api/workouts/%s";
         return ResponseEntity
                 .created(URI.create(String.format(workoutUriFormat, w.getWorkoutId())))
                 .body(w);
