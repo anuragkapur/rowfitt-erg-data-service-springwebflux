@@ -8,14 +8,15 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Component
-public class InMemoryRepository implements WorkoutRepository {
+public class InMemoryWorkoutRepository implements WorkoutRepository {
 
     private Map<String, Workout> workoutsMap;
 
-    public InMemoryRepository() {
+    public InMemoryWorkoutRepository() {
         this.workoutsMap = new HashMap<>();
     }
 
@@ -31,6 +32,13 @@ public class InMemoryRepository implements WorkoutRepository {
     public Flux<Workout> getAllWorkoutsForUser(String userId) {
         return Flux.fromStream(
                 workoutsMap.values().stream().filter(w -> w.getUserId().equals(userId))
+        );
+    }
+
+    @Override
+    public Flux<Workout> getAllWorkoutsForUsers(List<String> userIds) {
+        return Flux.fromStream(
+                workoutsMap.values().stream().filter(w -> userIds.contains(w.getUserId()))
         );
     }
 

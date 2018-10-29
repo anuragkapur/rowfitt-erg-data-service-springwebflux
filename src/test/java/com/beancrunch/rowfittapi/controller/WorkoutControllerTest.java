@@ -3,7 +3,7 @@ package com.beancrunch.rowfittapi.controller;
 import com.beancrunch.rowfittapi.JWTTestSupportClock;
 import com.beancrunch.rowfittapi.domain.Workout;
 import com.beancrunch.rowfittapi.filter.AuthorisationFilter;
-import com.beancrunch.rowfittapi.repository.InMemoryRepository;
+import com.beancrunch.rowfittapi.repository.InMemoryWorkoutRepository;
 import com.beancrunch.rowfittapi.repository.WorkoutRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Jwts;
@@ -28,7 +28,7 @@ import java.util.List;
 
 @RunWith(SpringRunner.class)
 @WebFluxTest(WorkoutController.class)
-@Import({InMemoryRepository.class, AuthorisationFilter.class, GlobalExceptionHandler.class})
+@Import({InMemoryWorkoutRepository.class, AuthorisationFilter.class, GlobalExceptionHandler.class})
 public class WorkoutControllerTest {
 
     @Autowired
