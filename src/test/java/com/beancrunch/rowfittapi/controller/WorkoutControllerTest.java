@@ -42,7 +42,7 @@ public class WorkoutControllerTest {
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
-    private String expectedLocationHeaderRegex = "^.*/api/workout/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-" +
+    private String expectedLocationHeaderRegex = "^.*/api/workouts/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-" +
             "[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$";
 
     @Before
@@ -68,7 +68,7 @@ public class WorkoutControllerTest {
     public void saveWorkoutEndpointWithValidAccessTokenShouldSaveWorkoutToRepo() throws IOException {
         EntityExchangeResult<Workout> savedResult = this.webTestClient
                 .post()
-                .uri("/api/workout")
+                .uri("/api/workouts")
                 .body(BodyInserters.fromObject(getSaveWorkoutRequestBody()))
                 .header("Content-Type", "application/json")
                 .header("Authorization", "Bearer " + getValidAccessToken())
@@ -91,7 +91,7 @@ public class WorkoutControllerTest {
     public void saveWorkoutEndpointWithoutAuthorizationHeaderShouldReturn401() {
         this.webTestClient
                 .post()
-                .uri("/api/workout")
+                .uri("/api/workouts")
                 .body(BodyInserters.fromObject(getSaveWorkoutRequestBody()))
                 .header("Content-Type", "application/json")
                 .exchange()
