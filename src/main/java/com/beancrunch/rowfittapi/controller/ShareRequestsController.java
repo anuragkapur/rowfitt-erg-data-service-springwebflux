@@ -13,7 +13,7 @@ import reactor.core.publisher.Mono;
 public class ShareRequestsController {
 
     @Autowired
-    private ShareRequestsRepository repository;
+    private ShareRequestsRepository shareRequestsRepository;
 
     @PutMapping("/{shareId}")
     @ResponseStatus(HttpStatus.OK)
@@ -21,12 +21,12 @@ public class ShareRequestsController {
             @PathVariable String shareId,
             @RequestBody ShareRequest shareRequest) {
 
-        return repository
+        return shareRequestsRepository
                 .findById(shareId)
                 .map(s -> {
                     s.setShareStatus(shareRequest.getShareStatus());
                     return s;
                 })
-                .doOnSuccess(repository::save);
+                .doOnSuccess(shareRequestsRepository::save);
     }
 }

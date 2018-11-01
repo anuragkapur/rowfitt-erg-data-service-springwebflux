@@ -18,6 +18,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Optional;
+import java.util.function.Function;
 
 import static java.util.Optional.ofNullable;
 
@@ -63,8 +64,50 @@ public class WorkoutController {
         ofNullable(sortBy).map(SortBy::valueOf).map(builder::sortBy);
 
         return workoutRepository
-                .getAllWorkoutsForUser(requestedUserId, builder.build())
+                .getAllWorkoutsFor(requestedUserId, builder.build())
                 .sort(WorkoutController::compareDates);
+    }
+
+    @GetMapping("/leaderboard")
+    public Flux<Workout> getLeaderboardWorkoutsForUser(@RequestAttribute(name = "userId") String allowedUserId,
+            @RequestParam(name = "userId") String requestedUserId, @RequestParam(required = false) String minDate,
+            @RequestParam(required = false) String maxDate, @RequestParam(required = false) String minDistance,
+            @RequestParam(required = false) String maxDistance, @RequestParam(required = false) String minTimeHh,
+            @RequestParam(required = false) String maxTimeHh, @RequestParam(required = false) String minTimeMm,
+            @RequestParam(required = false) String maxTimeMm) {
+
+        if (!requestedUserId.equals(allowedUserId)) {
+            throw new NotAuthorisedException("Access token not authorised to get workouts for user="+requestedUserId);
+        }
+
+        FilterCriteria.FilterCriteriaBuilder criteria = FilterCriteria.builder();
+        ofNullable(minDate).flatMap(this::getDate).map(criteria::minDate);
+        ofNullable(maxDate).flatMap(this::getDate).map(criteria::maxDate);
+        ofNullable(minDistance).map(Integer::parseInt).map(criteria::minDistance);
+        ofNullable(maxDistance).map(Integer::parseInt).map(criteria::maxDistance);
+        ofNullable(minTimeHh).map(Integer::parseInt).map(criteria::minTimeHh);
+        ofNullable(maxTimeHh).map(Integer::parseInt).map(criteria::maxTimeHh);
+        ofNullable(minTimeMm).map(Integer::parseInt).map(criteria::minTimeMm);
+        ofNullable(maxTimeMm).map(Integer::parseInt).map(criteria::maxTimeMm);
+
+        Flux<Workout> userWorkout = workoutRepository
+                .getAllWorkoutsFor(requestedUserId, criteria.build())
+                .sort(WorkoutController::compareSplits)
+                .take(1);
+
+        Flux<Workout> networkWorkouts = getUsersNetwork(requestedUserId)
+                    .collectList()
+                    .map(userIds -> workoutRepository.getAllWorkoutsFor(userIds, criteria.build()))
+                    .flux()
+                    .flatMap(Function.identity())
+                    .sort(WorkoutController::compareSplits)
+                    .take(3);
+
+        return Flux.merge(networkWorkouts, userWorkout).sort(WorkoutController::compareSplits).take(3);
+    }
+
+    private Flux<String> getUsersNetwork(String requestedUserId) {
+        return Mono.just(requestedUserId).flux();
     }
 
     private static ResponseEntity responseEntityFromWorkout(Workout w) {
@@ -76,6 +119,17 @@ public class WorkoutController {
 
     private static int compareDates(Workout w1, Workout w2) {
         if (w1.getDate().before(w2.getDate())) {
+            return -1;
+        } else {
+            return 1;
+        }
+    }
+
+    private static int compareSplits(Workout w1, Workout w2) {
+        float w1SplitInSeconds = w1.getSplitMm()*60+w1.getSplitSss();
+        float w2SplitInSeconds = w2.getSplitMm()*60+w2.getSplitSss();
+
+        if (w1SplitInSeconds < w2SplitInSeconds) {
             return -1;
         } else {
             return 1;

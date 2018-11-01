@@ -9,9 +9,9 @@ import java.util.List;
 
 public interface WorkoutRepository extends ReactiveCrudRepository<Workout, String> {
 
-     Flux<Workout> getAllWorkoutsForUser(String userId);
+     Flux<Workout> getAllWorkoutsFor(String userId);
 
-     Flux<Workout> getAllWorkoutsForUsers(List<String> userIds);
+     Flux<Workout> getAllWorkoutsFor(List<String> userIds, FilterCriteria criteria);
 
-     Flux<Workout> getAllWorkoutsForUser(String requestedUserId, FilterCriteria build);
+     Flux<Workout> getAllWorkoutsFor(String requestedUserId, FilterCriteria criteria);
 }
